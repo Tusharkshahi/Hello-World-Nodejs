@@ -64,7 +64,7 @@ resource "aws_ecs_service" "helloWorld" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = ["subnet-0736db02bfae94ac8"]
-    security_groups = ["sg-02f158d7bc5f2eb49"]
+    subnets         = ["subnet-005fc6c4dc01a48d3"]
+    security_groups = ["sg-091a92188a1d830bc"]
   }
 }
