@@ -1,31 +1,54 @@
-# Configure the AWS provider
 provider "aws" {
-  region = "ap-south-1"  # AWS region to deploy resources in
+  region = "ap-south-1"
 }
 
 # Create an ECS cluster
 resource "aws_ecs_cluster" "helloWorld" {
-  name = "helloWorld-cluster"  # Name of the ECS cluster
+  name = "helloWorld-cluster"
+}
+
+# IAM Role for ECS Task Execution
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 # Define the ECS task definition
 resource "aws_ecs_task_definition" "helloWorld" {
-  family                   = "hello-world"  # Name of the task family
-  network_mode             = "awsvpc"  # Use AWS VPC networking mode
-  requires_compatibilities = ["FARGATE"]  # Specify Fargate as the launch type
-  cpu                      = "256"  # CPU units to allocate to the task
-  memory                   = "512"  # Memory in MiB to allocate to the task
+  family                   = "hello-world"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
     {
-      name      = "hello-world"  # Container name
-      image     = "tusharkshahi/hello-world-nodejs:latest"  # Docker image to use
-      essential = true  # Indicates if the container is essential to the task
+      name      = "hello-world"
+      image     = "tusharkshahi/hello-world-nodejs:latest"
+      essential = true
 
       portMappings = [
         {
-          containerPort = 3000  # Port on the container to expose
-          hostPort      = 3000  # Port on the host to bind to
+          containerPort = 3000
+          hostPort      = 3000
         }
       ]
     }
@@ -34,13 +57,14 @@ resource "aws_ecs_task_definition" "helloWorld" {
 
 # Define the ECS service
 resource "aws_ecs_service" "helloWorld" {
-  name            = "helloWorld-service"  # Name of the ECS service
-  cluster         = aws_ecs_cluster.helloWorld.id  # Reference to the ECS cluster
-  task_definition = aws_ecs_task_definition.helloWorld.arn  # Reference to the task definition
-  desired_count   = 1  # Number of tasks to run
+  name            = "helloWorld-service"
+  cluster         = aws_ecs_cluster.helloWorld.id
+  task_definition = aws_ecs_task_definition.helloWorld.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = ["subnet-0736db02bfae94ac8"]  # Subnets for the service
-    security_groups = ["sg-02f158d7bc5f2eb49"]  # Security groups for the service
+    subnets         = ["subnet-0736db02bfae94ac8"]
+    security_groups = ["sg-02f158d7bc5f2eb49"]
   }
 }
