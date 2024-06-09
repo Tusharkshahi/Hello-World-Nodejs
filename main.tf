@@ -2,7 +2,7 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-# Create an ECS cluster
+
 resource "aws_ecs_cluster" "helloWorld" {
   name = "helloWorld-cluster"
 }
