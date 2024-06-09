@@ -24,8 +24,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t your-dockerhub-username/hello-world-nodejs:latest .
-          docker push your-dockerhub-username/hello-world-nodejs:latest
+          docker build -t tusharkshahi/hello_world_nodejs:latest .
+          docker push tusharkshahi/hello_world_nodejs:latest
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
