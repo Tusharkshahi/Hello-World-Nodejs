@@ -1,6 +1,6 @@
 # Configure the AWS provider
 provider "aws" {
-  region = "Mumbai"  # AWS region to deploy resources in
+  region = "ap-south-1"  # AWS region to deploy resources in
 }
 
 # Create an ECS cluster
