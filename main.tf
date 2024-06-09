@@ -40,7 +40,7 @@ resource "aws_ecs_service" "helloWorld" {
   desired_count   = 1  # Number of tasks to run
 
   network_configuration {
-    subnets         = ["subnet-0736db02bfae94ac8"]  # Subnets for the service
-    security_groups = ["sg-02f158d7bc5f2eb49"]  # Security groups for the service
+    subnets         = ["subnet-005fc6c4dc01a48d3"]  # Subnets for the service
+    security_groups = ["sg-091a92188a1d830bc"]  # Security groups for the service
   }
 }
