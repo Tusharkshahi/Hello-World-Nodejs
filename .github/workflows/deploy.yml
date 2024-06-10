@@ -1,4 +1,4 @@
-name: Deploy to AWS ECS
+name: Deploy to ECS
 
 on:
   push:
@@ -10,36 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      with:
+        registry: your-account-id.dkr.ecr.your-region.amazonaws.com
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t tusharkshahi/hello_world_nodejs:latest .
-          docker push tusharkshahi/hello_world_nodejs:latest
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: 851725266600.dkr.ecr.ap-south-1.amazonaws.com
+        ECR_REPOSITORY: hello-world-nodejs
+        IMAGE_TAG: latest
+      run: |
+        docker build -t 851725266600.dkr.ecr.ap-south-1.amazonaws.com/hello-world-nodejs .
+        docker push 851725266600.dkr.ecr.ap-south-1.amazonaws.com/hello-world-nodejs
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.0
+    - name: Download Terraform
+      uses: hashicorp/setup-terraform@v1
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: .
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: terraform
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: .
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-east-1'
+    - name: Apply Terraform
+      run: terraform apply -auto-approve
+      working-directory: terraform
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-south-1
