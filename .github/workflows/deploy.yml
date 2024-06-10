@@ -20,7 +20,11 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
       with:
+        region: ap-south-1  # Specify your AWS region here
         registry: 851725266600.dkr.ecr.ap-south-1.amazonaws.com
+        mask-password: false
+        registry-type: private
+        skip-logout: false
 
     - name: Build, tag, and push image to Amazon ECR
       env:
