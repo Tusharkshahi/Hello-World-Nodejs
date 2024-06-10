@@ -13,18 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1  # Specify your AWS region here
 
     - name: Log in to Amazon ECR
-      id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
       with:
-        region: ap-south-1  # Specify your AWS region here
-        registry: 851725266600.dkr.ecr.ap-south-1.amazonaws.com
-        mask-password: false
         registry-type: private
-        skip-logout: false
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
     - name: Build, tag, and push image to Amazon ECR
       env:
@@ -33,19 +35,19 @@ jobs:
         IMAGE_TAG: latest
       run: |
         docker build -t 851725266600.dkr.ecr.ap-south-1.amazonaws.com/hello-world-nodejs .
-        docker push 851725266600.dkr.ecr.ap-south-1.amazonaws.com/hello-world-nodejs
+        docker push 851725266600.dkr.ecr.ap-south-1.amazonaws.com/hello-world-nodejs:latest
 
     - name: Download Terraform
       uses: hashicorp/setup-terraform@v1
 
     - name: Initialize Terraform
       run: terraform init
-      working-directory: terraform
+      working-directory: terraform-ecs
 
     - name: Apply Terraform
       run: terraform apply -auto-approve
-      working-directory: terraform
+      working-directory: terraform-ecs
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ap-south-1
+        AWS_DEFAULT_REGION: ap-south-1  # Specify your AWS region here
